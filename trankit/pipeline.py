@@ -341,7 +341,7 @@ class Pipeline:
         for batch in DataLoader(test_set, batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             wordpiece_reprs = self._embedding_layers.get_tokenizer_inputs(batch)
-            predictions = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs)
+            *predictions, self.token_rich_embeds = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
             wp_pred_labels, wp_ends, para_ids = predictions[0], predictions[1], predictions[2]
             wp_pred_labels = wp_pred_labels.data.cpu().numpy().tolist()
 
@@ -463,7 +463,7 @@ class Pipeline:
         for batch in DataLoader(test_set, batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             wordpiece_reprs = self._embedding_layers.get_tokenizer_inputs(batch)
-            predictions = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs)
+            *predictions, self.token_rich_embeds = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
             wp_pred_labels, wp_ends, para_ids = predictions[0], predictions[1], predictions[2]
             wp_pred_labels = wp_pred_labels.data.cpu().numpy().tolist()
 
@@ -568,7 +568,7 @@ class Pipeline:
         for batch in DataLoader(test_set, batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             wordpiece_reprs = self._embedding_layers.get_tokenizer_inputs(batch)
-            predictions = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs)
+            *predictions, self.token_rich_embeds = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
             wp_pred_labels, wp_ends, para_ids = predictions[0], predictions[1], predictions[2]
             wp_pred_labels = wp_pred_labels.data.cpu().numpy().tolist()
 
@@ -733,7 +733,7 @@ class Pipeline:
             batch_size = len(batch.word_num)
 
             word_reprs, cls_reprs = self._embedding_layers.get_tagger_inputs(batch)
-            predictions = self._tagger[self._config.active_lang].predict(batch, word_reprs, cls_reprs)
+            *predictions, self.tagger_rich_embeds = self._tagger[self._config.active_lang].predict(batch, word_reprs, cls_reprs, with_rich_embeds=True)
             predicted_upos = predictions[0]
             predicted_xpos = predictions[1]
             predicted_feats = predictions[2]
@@ -810,7 +810,7 @@ class Pipeline:
             batch_size = len(batch.word_num)
 
             word_reprs, cls_reprs = self._embedding_layers.get_tagger_inputs(batch)
-            predictions = self._tagger[self._config.active_lang].predict(batch, word_reprs, cls_reprs)
+            *predictions, self.tagger_rich_embeds = self._tagger[self._config.active_lang].predict(batch, word_reprs, cls_reprs, with_rich_embeds=True)
             predicted_upos = predictions[0]
             predicted_xpos = predictions[1]
             predicted_feats = predictions[2]
@@ -992,7 +992,7 @@ class Pipeline:
                                 batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             word_reprs, cls_reprs = self._embedding_layers.get_tagger_inputs(batch)
-            pred_entity_labels = self._ner_model[self._config.active_lang].predict(batch, word_reprs)
+            pred_entity_labels, self.ner_rich_embeds = self._ner_model[self._config.active_lang].predict(batch, word_reprs)
 
             batch_size = len(batch.word_num)
 
@@ -1027,7 +1027,7 @@ class Pipeline:
                                 batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             word_reprs, cls_reprs = self._embedding_layers.get_tagger_inputs(batch)
-            pred_entity_labels = self._ner_model[self._config.active_lang].predict(batch, word_reprs)
+            pred_entity_labels, self.ner_rich_embeds = self._ner_model[self._config.active_lang].predict(batch, word_reprs)
 
             batch_size = len(batch.word_num)
 
