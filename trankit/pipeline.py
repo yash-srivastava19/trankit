@@ -62,6 +62,12 @@ class Pipeline:
         self._setup_config(lang)
         self._config.training = False
         self.added_langs = [lang]
+        
+        # Will be assigned an embedding in tokenizer, posdep, and ner function !!!.
+        self.token_rich_embeds = None
+        self.tagger_rich_embeds = None
+        self.ner_rich_embeds = None
+        
         for lang in self.added_langs:
             assert lang in lang2treebank, '{} has not been supported. Currently supported languages: {}'.format(lang,
                                                                                                                 list(
