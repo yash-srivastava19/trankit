@@ -43,7 +43,8 @@ class NERClassifier(nn.Module):
         loss, trans = self.crit(logits, batch.word_mask, batch.entity_label_idxs)
         return loss
 
-    def predict(self, batch, word_reprs):
+    def predict(self, batch, word_reprs, with_rich_embeds=False):
+        # We need to have the final embeddings(or scores), before the prediction head for our task.
         batch_size, _, _ = word_reprs.size()
 
         logits = self.entity_label_ffn(word_reprs)
@@ -57,7 +58,9 @@ class NERClassifier(nn.Module):
             tags, _ = viterbi_decode(scores[i, :batch.word_num[i]], trans)
             tags = [self.entity_label_itos[t] for t in tags]
             tag_seqs += [tags]
-        return tag_seqs
+        if with_rich_embeds is False:
+            return tag_seqs
+        return tag_seqs, scores
 
 
 class PosDepClassifier(nn.Module):
@@ -147,7 +150,8 @@ class PosDepClassifier(nn.Module):
 
         return loss
 
-    def predict(self, batch, word_reprs, cls_reprs):
+    def predict(self, batch, word_reprs, cls_reprs, with_rich_embeds=False):
+        # We need to have the final embeddings(or scores), before the prediction head for our task.
         # upos
         upos_scores = self.upos_ffn(word_reprs)
         predicted_upos = torch.argmax(upos_scores, dim=2)
@@ -177,7 +181,9 @@ class PosDepClassifier(nn.Module):
         dep_preds = []
         dep_preds.append(F.log_softmax(unlabeled_scores, 2).detach().cpu().numpy())
         dep_preds.append(deprel_scores.max(3)[1].detach().cpu().numpy())
-        return predicted_upos, predicted_xpos, predicted_feats, dep_preds
+        if with_rich_embeds is False:
+            return predicted_upos, predicted_xpos, predicted_feats, dep_preds
+        return predicted_upos, predicted_xpos, predicted_feats, dep_preds, deprel_scores
 
 
 class TokenizerClassifier(nn.Module):
@@ -215,8 +221,12 @@ class TokenizerClassifier(nn.Module):
 
         return loss
 
-    def predict(self, batch, wordpiece_reprs):
+    def predict(self, batch, wordpiece_reprs, with_rich_embeds=False):
+        # We need to have the final embeddings, before the prediction head for our task.
         wordpiece_scores = self.tokenizer_ffn(wordpiece_reprs)
         predicted_wordpiece_labels = torch.argmax(wordpiece_scores, dim=2)  # [batch size, num wordpieces]
 
-        return predicted_wordpiece_labels, batch.wordpiece_ends, batch.paragraph_index
+        if with_rich_embeds is False:
+            return predicted_wordpiece_labels, batch.wordpiece_ends, batch.paragraph_index
+        return predicted_wordpiece_labels, batch.wordpiece_ends, batch.paragraph_index, wordpiece_scores
+        
