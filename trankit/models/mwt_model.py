@@ -321,7 +321,7 @@ class MWTWrapper:
             dev_score = get_ud_score(self.system_pred_file, self.gold_file)
             print(get_ud_performance_table(dev_score))
 
-    def predict(self, tokenized_doc):
+    def predict(self, tokenized_doc, with_rich_embeds=False):
         args = self.args
         loaded_args = self.loaded_args
         vocab = self.vocab
@@ -339,4 +339,6 @@ class MWTWrapper:
 
         doc = deepcopy(batch.doc)
         expanded_doc = set_mwt_expansions(doc, preds)
-        return expanded_doc
+        if with_rich_embeds is False:
+            return expanded_doc
+        return expanded_doc, preds
