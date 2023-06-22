@@ -347,7 +347,10 @@ class Pipeline:
         for batch in DataLoader(test_set, batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             wordpiece_reprs = self._embedding_layers.get_tokenizer_inputs(batch)
-            *predictions, self.token_rich_embeds = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
+            predictions = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
+            
+            self._tokenizer['token_rich_embeds'] = predictions[3]
+            
             wp_pred_labels, wp_ends, para_ids = predictions[0], predictions[1], predictions[2]
             wp_pred_labels = wp_pred_labels.data.cpu().numpy().tolist()
 
@@ -469,7 +472,10 @@ class Pipeline:
         for batch in DataLoader(test_set, batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             wordpiece_reprs = self._embedding_layers.get_tokenizer_inputs(batch)
-            *predictions, self.token_rich_embeds = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
+            predictions = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
+
+            self._tokenizer['token_rich_embeds'] = predictions[3]
+                                    
             wp_pred_labels, wp_ends, para_ids = predictions[0], predictions[1], predictions[2]
             wp_pred_labels = wp_pred_labels.data.cpu().numpy().tolist()
 
@@ -574,7 +580,10 @@ class Pipeline:
         for batch in DataLoader(test_set, batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             wordpiece_reprs = self._embedding_layers.get_tokenizer_inputs(batch)
-            *predictions, self.token_rich_embeds = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
+            predictions  = self._tokenizer[self._config.active_lang].predict(batch, wordpiece_reprs, with_rich_embeds=True)
+            
+            self._tokenizer['token_rich_embeds'] = predictions[3]
+            
             wp_pred_labels, wp_ends, para_ids = predictions[0], predictions[1], predictions[2]
             wp_pred_labels = wp_pred_labels.data.cpu().numpy().tolist()
 
@@ -739,7 +748,10 @@ class Pipeline:
             batch_size = len(batch.word_num)
 
             word_reprs, cls_reprs = self._embedding_layers.get_tagger_inputs(batch)
-            *predictions, self.tagger_rich_embeds = self._tagger[self._config.active_lang].predict(batch, word_reprs, cls_reprs, with_rich_embeds=True)
+            predictions = self._tagger[self._config.active_lang].predict(batch, word_reprs, cls_reprs, with_rich_embeds=True)
+
+            self._tagger['tagger_rich_embeds'] = predictions[3]
+                                    
             predicted_upos = predictions[0]
             predicted_xpos = predictions[1]
             predicted_feats = predictions[2]
@@ -816,7 +828,10 @@ class Pipeline:
             batch_size = len(batch.word_num)
 
             word_reprs, cls_reprs = self._embedding_layers.get_tagger_inputs(batch)
-            *predictions, self.tagger_rich_embeds = self._tagger[self._config.active_lang].predict(batch, word_reprs, cls_reprs, with_rich_embeds=True)
+            predictions = self._tagger[self._config.active_lang].predict(batch, word_reprs, cls_reprs, with_rich_embeds=True)
+            
+            self._tagger['tagger_rich_embeds'] = predictions[3]
+                                    
             predicted_upos = predictions[0]
             predicted_xpos = predictions[1]
             predicted_feats = predictions[2]
@@ -998,8 +1013,12 @@ class Pipeline:
                                 batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             word_reprs, cls_reprs = self._embedding_layers.get_tagger_inputs(batch)
-            pred_entity_labels, self.ner_rich_embeds = self._ner_model[self._config.active_lang].predict(batch, word_reprs)
+            
+            dummy_list = self._ner_model[self._config.active_lang].predict(batch, word_reprs, with_rich_embeds=True)
 
+            self._ner_model['ner_rich_embeds'] = dummy_list[1]
+            pred_entity_labels = dummy_list[0]
+                                    
             batch_size = len(batch.word_num)
 
             for bid in range(batch_size):
@@ -1033,8 +1052,11 @@ class Pipeline:
                                 batch_size=eval_batch_size,
                                 shuffle=False, collate_fn=test_set.collate_fn):
             word_reprs, cls_reprs = self._embedding_layers.get_tagger_inputs(batch)
-            pred_entity_labels, self.ner_rich_embeds = self._ner_model[self._config.active_lang].predict(batch, word_reprs)
+            dummy_list = self._ner_model[self._config.active_lang].predict(batch, word_reprs, with_rich_embeds=True)
 
+            pred_entity_labels = dummy_list[0]
+            self._ner_model['ner_rich_embeds'] = dummy_list[1]
+                                    
             batch_size = len(batch.word_num)
 
             for bid in range(batch_size):
