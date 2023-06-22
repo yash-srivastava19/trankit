@@ -937,11 +937,19 @@ class Pipeline:
             in_doc = self._posdep_doc(in_doc)
 
         dlemmatize_doc = deepcopy(in_doc)
-        lemmatized_doc = self._lemma_model[self._config.active_lang].predict(dlemmatize_doc, obmit_tag)
+        dummy_list = self._lemma_model[self._config.active_lang].predict(dlemmatize_doc, obmit_tag, with_rich_embeds=True)
+        
+        self._lemma_model['lemma_rich_embeds'] = dummy_list[1]
+        
+        lemmatized_doc = dummy_list[0]
         return lemmatized_doc
 
     def _mwt_expand(self, tokenized_doc):
-        expanded_doc = self._mwt_model[self._config.active_lang].predict(tokenized_doc)
+        dummy_list = self._mwt_model[self._config.active_lang].predict(tokenized_doc, with_rich_embeds=True)
+        expanded_doc = dummy_list[0]
+
+        self._mwt_model['mwt_rich_embeds'] = dummy_list[1]
+        
         return expanded_doc
 
     def ner(self, input, is_sent=False):
