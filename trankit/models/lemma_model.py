@@ -467,7 +467,7 @@ class LemmaWrapper:
             print('This language does not require lemmatization.')
             self.config.logger.info('This language does not require lemmatization.')
 
-    def predict(self, tagged_doc, obmit_tag):
+    def predict(self, tagged_doc, obmit_tag, with_rich_embeds=False):
         if self.treebank_name not in ['UD_Old_French-SRCMF', 'UD_Vietnamese-VTB', 'UD_Vietnamese-VLSP']:
             vocab = self.vocab
             # load data
@@ -513,4 +513,6 @@ class LemmaWrapper:
 
             # write to file and score
             lemmatized_doc = set_lemma(tagged_doc, preds, obmit_tag)
-        return lemmatized_doc
+        if with_rich_embeds is False:    
+            return lemmatized_doc
+        return lemmatized_doc, preds
